@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            background: #f5f7fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .converter {
+            background: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            max-width: 350px;
+            width: 100%;
+        }
+        .converter h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background: #0078d4;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        .result {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #0078d4;
+            min-height: 1.5em;
+            font-weight: bold;
+        }
+        .date-info {
+            font-size: 0.8rem;
+            color: #777;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="converter">
+        <h2>Currency Converter</h2>
+        <div class="form-group">
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" placeholder="Enter amount" min="0" step="any">
+        </div>
+        <div class="form-group">
+            <label for="from">From</label>
+            <select id="from">
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="JPY">JPY - Japanese Yen</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+                <option value="CNY">CNY - Chinese Yuan</option>
+                <option value="BRL">BRL - Brazilian Real</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="to">To</label>
+            <select id="to">
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="INR" selected>INR - Indian Rupee</option>
+                <option value="JPY">JPY - Japanese Yen</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+                <option value="CNY">CNY - Chinese Yuan</option>
+                <option value="BRL">BRL - Brazilian Real</option>
+            </select>
+        </div>
+        <button onclick="convertCurrency()">Convert</button>
+        <div class="result" id="result"></div>
+        <div class="date-info" id="dateInfo">Rates as of June 2024</div>
+    </div>
+    <script>
+        // Current exchange rates as of June 2024 (approximate market rates)
+        const rates = {
+            USD: { 
+                USD: 1, EUR: 0.93, GBP: 0.79, INR: 83.50, 
+                JPY: 157.50, AUD: 1.51, CAD: 1.37, CNY: 7.25, BRL: 5.35 
+            },
+            EUR: { 
+                USD: 1.08, EUR: 1, GBP: 0.85, INR: 89.80, 
+                JPY: 169.50, AUD: 1.63, CAD: 1.48, CNY: 7.82, BRL: 5.78 
+            },
+            GBP: { 
+                USD: 1.27, EUR: 1.18, GBP: 1, INR: 105.80, 
+                JPY: 199.50, AUD: 1.92, CAD: 1.74, CNY: 9.20, BRL: 6.80 
+            },
+            INR: { 
+                USD: 0.012, EUR: 0.011, GBP: 0.0095, INR: 1, 
+                JPY: 1.89, AUD: 0.018, CAD: 0.016, CNY: 0.087, BRL: 0.064 
+            },
+            JPY: { 
+                USD: 0.0064, EUR: 0.0059, GBP: 0.0050, INR: 0.53, 
+                JPY: 1, AUD: 0.0096, CAD: 0.0087, CNY: 0.046, BRL: 0.034 
+            },
+            AUD: { 
+                USD: 0.66, EUR: 0.61, GBP: 0.52, INR: 55.30, 
+                JPY: 104.30, AUD: 1, CAD: 0.91, CNY: 4.80, BRL: 3.55 
+            },
+            CAD: { 
+                USD: 0.73, EUR: 0.68, GBP: 0.57, INR: 60.80, 
+                JPY: 114.70, AUD: 1.10, CAD: 1, CNY: 5.28, BRL: 3.90 
+            },
+            CNY: { 
+                USD: 0.14, EUR: 0.13, GBP: 0.11, INR: 11.50, 
+                JPY: 21.70, AUD: 0.21, CAD: 0.19, CNY: 1, BRL: 0.74 
+            },
+            BRL: { 
+                USD: 0.19, EUR: 0.17, GBP: 0.15, INR: 15.60, 
+                JPY: 29.40, AUD: 0.28, CAD: 0.26, CNY: 1.35, BRL: 1 
+            }
+        };
+
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+            const resultDiv = document.getElementById('result');
+
+            if (isNaN(amount) || amount < 0) {
+                resultDiv.textContent = "Please enter a valid amount";
+                resultDiv.style.color = "#e74c3c";
+                return;
+            }
+
+            if (from === to) {
+                resultDiv.textContent = "Currencies are the same!";
+                resultDiv.style.color = "#e74c3c";
+                return;
+            }
+
+            const rate = rates[from][to];
+            const converted = amount * rate;
+            
+            resultDiv.style.color = "#0078d4";
+            resultDiv.textContent = `${amount.toLocaleString()} ${from} = ${converted.toLocaleString(undefined, {maximumFractionDigits: 2})} ${to}`;
+            
+            // Update the date info
+            document.getElementById('dateInfo').textContent = `1 ${from} = ${rate.toFixed(6)} ${to} (June 2024 rates)`;
+        }
+    </script>
+</body>
+</html>
